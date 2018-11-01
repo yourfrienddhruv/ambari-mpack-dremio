@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<metainfo>
+    <schemaVersion>2.0</schemaVersion>
+    <services>
+        <service>
+            <name>DREMIO</name>
+            <displayName>Dremio</displayName>
+            <comment>Dremio
+            </comment>
+            <version>3.0</version>
+
+            <components>
+                <component>
+                    <name>DREMIO_COORDINATOR</name>
+                    <displayName>Master Coordinator</displayName>
+                    <category>MASTER</category>
+                    <cardinality>1+</cardinality>
+                    <versionAdvertised>true</versionAdvertised>
+                    <commandScript>
+                        <script>scripts/dremio_coordinator.py</script>
+                        <scriptType>PYTHON</scriptType>
+                        <timeout>5000</timeout>
+                    </commandScript>
+                </component>
+            </components>
+           
+        </service>
+    </services>
+</metainfo>
