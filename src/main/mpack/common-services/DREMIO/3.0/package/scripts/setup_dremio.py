@@ -1,11 +1,18 @@
 #!/usr/bin/env python
-import sys, os, pwd, grp, signal, time
+
 from resource_management import *
-from subprocess import call
-from common import *
 
-def setup_dremio():
+
+def setup_dremio(env):
     import params
-    import status_params
-    Logger.info("Configure Hue Service")
+    env.set_params(params)
+    Logger.info("Configure Dremio Service")
 
+
+def dremio_configure(env):
+    import params
+    env.set_params(params)
+    File(format("{hue_conf_dir}/pseudo-distributed.ini"),
+         content = InlineTemplate(params.hue_pseudodistributed_content),
+         owner = params.dremio_user
+         )

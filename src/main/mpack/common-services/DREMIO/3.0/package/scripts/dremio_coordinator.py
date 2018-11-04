@@ -90,44 +90,32 @@ class DremioCordinator(Script):
         setup_dremio()
 
     def start(self, env):
-        '''
-        Logger.info("Starting Elasticsearch ... ")
-        start_command = format('{elasticsearch_home}/bin/elasticsearch -Des.node.name={node_name} -Des.node.master={isMaster} -Des.node.data={isData} -Des.http.port={port} -Des.path.data={path_data} -d -p {pid_file}')
-
-        Execute(
-                start_command,
-                environment={
-                   'JAVA_HOME': params.java64_home,
-                   'ES_HEAP_SIZE': memory
-                },
-                user=params.elasticsearch_config_user
-        )
-        '''
-        pass
+        import params
+        env.set_params(params)
+        Execute("service dremio start")
+        Execute('ps -ef | grep "dremio" | grep -v grep | awk \'{print $2}\' | tail -n 1 > ' + params.dremio_pid_file,
+                user=params.dremio_user
+                )
 
 
     def stop(self, env):
-        '''
-        pid_file = config['pid_file']
+        import params
+        env.set_params(params)
+        # Kill the process of Airflow
+        Execute("service dremio stop")
+        File(params.dremio_pid_file,
+             action = "delete",
+             owner = params.dremio_user
+             )
 
-        Execute(
-                format('kill `cat {pid_file}`'),
-                user=params.elasticsearch_config_user,
-                only_if=format('test -f {pid_file}')
-        )
-
-        File(pid_file,
-             action="delete"
-        )
-        '''
-        pass
 
     def status(self, env):
-        '''
-        check_process_status(pid_file)
-        '''
-        pass
+        import params
+        env.set_params(params)
+        #use built-in method to check status using pidfile
+        check_process_status(params.dremio_pid_file)
+
 
 if __name__ == "__main__":
-    ExampleMaster().execute()
+    DremioCordinator().execute()
 
