@@ -34,4 +34,6 @@ dremio_install_dir = config['configurations']['dremio-env']['dremio_install_dir'
 dremio_bin_dir = config['configurations']['dremio-env']['dremio_bin_dir']
 dremio_pid_file = dremio_pid_dir + 'dremio.pid'
 
-hue_pseudodistributed_content = config['configurations']['pseudo-distributed.ini']['content']
+dremio_conf_content = config['configurations']['pseudo-dremio.conf']['content']
+dremio_env_content = config['configurations']['pseudo-dremio-env']['content']
+

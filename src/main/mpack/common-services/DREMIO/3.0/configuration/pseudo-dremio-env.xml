@@ -24,7 +24,7 @@
 
     <property>
         <name>content</name>
-        <description>Hue Configure File</description>
+        <description>Dremio env File</description>
         <value>
 #
 # Dremio environment variables used by Dremio daemon

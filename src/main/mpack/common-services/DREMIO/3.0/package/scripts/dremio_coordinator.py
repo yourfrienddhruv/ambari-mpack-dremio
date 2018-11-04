@@ -1,13 +1,14 @@
 #!/usr/bin/env python
-import grp, pwd, os
-
+import grp
+import pwd
+import os
 from resource_management import Group, User
 from resource_management.core.logger import Logger
 from resource_management.libraries.functions.check_process_status import check_process_status
 from resource_management.libraries.functions.format import format
 from resource_management.libraries.script.script import Script
-from resource_management.core.resources.system import Directory, File, Execute
-from resource_management.core.source import Template, InlineTemplate, DownloadSource
+from resource_management.core.resources.system import Directory, File, Execute, Link
+from resource_management.core.source import DownloadSource, InlineTemplate
 
 class DremioCordinator(Script):
 
@@ -55,7 +56,7 @@ class DremioCordinator(Script):
 
         File('/tmp/dremio.tar.gz',
              content = DownloadSource(params.download_url),
-             mode = 0644
+             mode=0644
              )
 
         Execute(
@@ -63,8 +64,10 @@ class DremioCordinator(Script):
             sudo=True
         )
 
-        Execute(
-            ('ln', '-s', params.dremio_install_dir, params.dremio_bin_dir),
+        Link(
+            path=params.dremio_install_dir,
+            to=params.dremio_bin_dir,
+            hard=True,
             sudo=True
         )
 
@@ -83,15 +86,22 @@ class DremioCordinator(Script):
             sudo=True
         )
 
-
     def configure(self, env):
         import params
         env.set_params(params)
-        setup_dremio()
+        File(format("{dremio_home_dir}/dremio.conf"),
+             content=InlineTemplate(params.dremio_conf_content),
+             owner=params.dremio_user
+             )
+
+        File(format("{dremio_home_dir}/dremio-env"),
+             content=InlineTemplate(params.dremio_env_content),
+             owner=params.dremio_user
+             )
 
     def start(self, env):
         import params
-        env.set_params(params)
+        self.configure(env)
         Execute("service dremio start")
         Execute('ps -ef | grep "dremio" | grep -v grep | awk \'{print $2}\' | tail -n 1 > ' + params.dremio_pid_file,
                 user=params.dremio_user

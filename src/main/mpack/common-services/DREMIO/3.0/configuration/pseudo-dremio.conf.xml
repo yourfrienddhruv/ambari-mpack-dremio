@@ -24,7 +24,7 @@
 
 <property>
 <name>content</name>
-<description>Hue Configure File</description>
+<description>Dremio conf File</description>
 <value>
 
 paths: {
