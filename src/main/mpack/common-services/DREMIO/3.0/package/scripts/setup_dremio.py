@@ -7,4 +7,5 @@ from common import *
 def setup_dremio():
     import params
     import status_params
-    Logger.info("Configure Dremio Service")
+    Logger.info("Configure Hue Service")
+
