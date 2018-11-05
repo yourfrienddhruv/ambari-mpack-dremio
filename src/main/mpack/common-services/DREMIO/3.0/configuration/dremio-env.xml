@@ -119,7 +119,7 @@
             local: "/var/lib/dremio"
 
             # the distributed path Dremio data including job results, downloads, uploads, etc
-            dist: "hdfs://{{namenode_address}}/apps/dremio"
+            dist: "{{namenode_address}}/apps/dremio"
 
             # location for catalog database (if master node)
             db: ${paths.local}/db,
@@ -169,6 +169,7 @@
 
             # the zookeeper quorum for the cluster
             zookeeper: "{{zookeeper_host_port}}"
+
 
         </value>
         <value-attributes>

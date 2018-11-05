@@ -78,7 +78,7 @@ zookeeper_rest_url = ''
 if len(zookeeper_hosts) > 0:
     if zookeeper_client_port is not None:
         for i in range(len(zookeeper_hosts)):
-            zookeeper_host_ports.append(format(zookeeper_hosts[i] + ":{zookeeper_client_port}"))
+            zookeeper_host_ports.append(format(zookeeper_hosts[i] + ":{{zookeeper_client_port}}"))
     else:
         for i in range(len(zookeeper_hosts)):
             zookeeper_host_ports.append(format(zookeeper_hosts[i] + ":2181"))

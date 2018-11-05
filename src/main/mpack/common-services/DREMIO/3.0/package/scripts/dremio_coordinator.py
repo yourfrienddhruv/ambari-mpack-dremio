@@ -111,16 +111,16 @@ class DremioCordinator(Script):
         import params
         env.set_params(params)
         self.configure(env)
-        Execute('systemctl', 'start', 'dremio')
+        Execute('systemctl start dremio')
 
     def stop(self, env):
-        Execute('systemctl', 'stop', 'dremio')
+        Execute('systemctl stop dremio')
 
     def restart(self, env):
         import params
         env.set_params(params)
         self.configure(env)
-        Execute('systemctl', 'restart', 'dremio')
+        Execute('systemctl restart dremio')
         
     def status(self, env):
         import status_params
