@@ -17,8 +17,8 @@
     <schemaVersion>2.0</schemaVersion>
     <services>
         <service>
-            <name>EXAMPLE</name>
-            <extends>common-services/EXAMPLE/1.0</extends>
+            <name>DREMIO</name>
+            <extends>common-services/DREMIO/3.0</extends>
         </service>
     </services>
 </metainfo>

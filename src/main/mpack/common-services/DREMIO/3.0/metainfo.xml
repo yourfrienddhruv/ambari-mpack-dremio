@@ -23,7 +23,22 @@
                     </commandScript>
                 </component>
             </components>
-           
+
+            <osSpecifics>
+                <osSpecific>
+                    <osFamily>any</osFamily>
+                    <packages>
+                        <package><name>wget</name></package>
+                        <package><name>tar</name></package>
+                    </packages>
+                </osSpecific>
+            </osSpecifics>
+
+            <configuration-dependencies>
+                <config-type>dremio-ambari-config</config-type>
+            </configuration-dependencies>
+            <restartRequiredAfterChange>true</restartRequiredAfterChange>
+
         </service>
     </services>
 </metainfo>

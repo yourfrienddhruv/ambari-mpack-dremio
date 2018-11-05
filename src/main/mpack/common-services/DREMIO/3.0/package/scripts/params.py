@@ -23,7 +23,6 @@ service_packagedir = os.path.realpath(__file__).split('/scripts')[0]
 cluster_name = str(config['clusterName'])
 ambari_server_hostname = config['clusterHostInfo']['ambari_server_host'][0]
 
-download_url = 'https://download.dremio.com/community-server/3.0.0-201810262305460004-5c90d75/dremio-community-3.0.0-201810262305460004-5c90d75.tar.gz'
 
 dremio_user = config['configurations']['dremio-env']['dremio_user']
 dremio_group = config['configurations']['dremio-env']['dremio_group']
@@ -32,7 +31,35 @@ dremio_pid_dir = config['configurations']['dremio-env']['dremio_pid_dir']
 dremio_log_dir = config['configurations']['dremio-env']['dremio_log_dir']
 dremio_install_dir = config['configurations']['dremio-env']['dremio_install_dir']
 dremio_bin_dir = config['configurations']['dremio-env']['dremio_bin_dir']
-dremio_pid_file = dremio_pid_dir + 'dremio.pid'
+dremio_pid_file = os.path.join(dremio_pid_dir, 'dremio.pid')
 
-configurations = config['configurations']['dremio-site']
 
+configurations = config['configurations']['flink-ambari-config']
+
+download_url = configurations['flink_download_url']
+dremio_conf_content = configurations['dremio_conf']
+dremio_env_content = configurations['dremio_env']
+
+
+# configurations of HDFS
+namenode_host = default("/clusterHostInfo/namenode_host", [])
+namenode_host.sort()
+namenode_address = None
+if 'dfs.namenode.rpc-address' in config['configurations']['hdfs-site']:
+    namenode_rpcaddress = config['configurations']['hdfs-site']['dfs.namenode.rpc-address']
+    namenode_address = format("hdfs://{namenode_rpcaddress}")
+else:
+    namenode_address = config['configurations']['core-site']['fs.defaultFS']
+# To judge whether the namenode HA mode
+dfs_ha_enabled = False
+dfs_ha_nameservices = default("/configurations/hdfs-site/dfs.nameservices", None)
+dfs_ha_namenode_ids = default(format("/configurations/hdfs-site/dfs.ha.namenodes.{dfs_ha_nameservices}"), None)
+dfs_ha_namemodes_ids_list = []
+if dfs_ha_namenode_ids:
+    dfs_ha_namemodes_ids_list = dfs_ha_namenode_ids.split(",")
+    dfs_ha_namenode_ids_array_len = len(dfs_ha_namemodes_ids_list)
+    if dfs_ha_namenode_ids_array_len > 1:
+        dfs_ha_enabled = True
+if dfs_ha_enabled:
+    namenode_address = format('hdfs://{dfs_ha_nameservices}')
+    logical_name = dfs_ha_nameservices

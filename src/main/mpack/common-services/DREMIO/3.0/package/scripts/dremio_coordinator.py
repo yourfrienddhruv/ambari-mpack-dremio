@@ -8,8 +8,7 @@ from resource_management.libraries.functions.check_process_status import check_p
 from resource_management.libraries.functions.format import format
 from resource_management.libraries.script.script import Script
 from resource_management.core.resources.system import Directory, File, Execute, Link
-from resource_management.core.source import DownloadSource, Template
-
+from resource_management.core.source import DownloadSource, InlineTemplate
 
 
 class DremioCordinator(Script):
@@ -45,6 +44,10 @@ class DremioCordinator(Script):
                       group=params.dremio_group,
                       create_parents=True
                       )
+
+        Execute('hdfs dfs -mkdir -p /user/'+params.dremio_user, user='hdfs', ignore_failures=True)
+        Execute('hdfs dfs -chown ' + params.dremio_user + ' /user/'+params.dremio_user, user='hdfs')
+        Execute('hdfs dfs -chgrp ' + params.dremio_group + ' /user/'+params.dremio_user, user='hdfs')
 
         # create the pid and log dir
         Directory([params.dremio_log_dir, params.dremio_pid_dir],
@@ -92,44 +95,36 @@ class DremioCordinator(Script):
         import params
         env.set_params(params)
 
-        File("{0}/dremio.conf".format(params.dremio_home_dir),
-             content=Template(
-                 "dremio.conf.j2",
-                 configurations=params.configurations),
-             owner=params.dremio_user,
-             group=params.dremio_group
-             )
+        properties_content = InlineTemplate(params.dremio_conf_content)
+        File(format("{dremio_home_dir}/dremio.conf"),
+             content=properties_content,
+             owner=params.dremio_user)
 
-        File("{0}/dremio-env".format(params.dremio_home_dir),
-             content=Template(
-                 "dremio-env.j2",
-                 configurations=params.configurations),
-             owner=params.dremio_user,
-             group=params.dremio_group
-             )
+        properties_content = InlineTemplate(params.dremio_env_content)
+        File(format("{dremio_home_dir}/dremio-env"),
+             content=properties_content,
+             owner=params.dremio_user)
 
     def start(self, env):
         import params
+        env.set_params(params)
         self.configure(env)
         Execute("service dremio start")
 
     def stop(self, env):
-        import params
-        env.set_params(params)
-        # Kill the process of Dremio
         Execute("service dremio stop")
 
     def restart(self, env):
         import params
         env.set_params(params)
-        # Kill the process of Dremio
+        self.configure(env)
         Execute("service dremio restart")
         
     def status(self, env):
-        import params
-        env.set_params(params)
+        import status_params
+        env.set_params(status_params)
         # use built-in method to check status using pidfile
-        check_process_status(params.dremio_pid_file)
+        check_process_status(status_params.dremio_pid_file)
 
 
 if __name__ == "__main__":

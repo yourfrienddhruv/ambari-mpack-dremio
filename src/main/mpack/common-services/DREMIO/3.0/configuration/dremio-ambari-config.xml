@@ -18,4 +18,9 @@
 -->
 <configuration>
 
+    <property>
+        <name>dremio_download_url</name>
+        <value>https://download.dremio.com/community-server/3.0.0-201810262305460004-5c90d75/dremio-community-3.0.0-201810262305460004-5c90d75.tar.gz</value>
+        <description>Snapshot download location. Downloaded when setup_prebuilt is true</description>
+    </property>
 </configuration>
