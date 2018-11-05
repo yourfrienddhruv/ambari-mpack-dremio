@@ -36,7 +36,7 @@ class DremioCordinator(Script):
                 ignore_failures=True
             )
 
-        if not os.path.exists("/home/{0}".format(params.dremio_user)):
+        if not os.path.exists("{0}".format(params.dremio_user)):
             Directory(params.dremio_home_dir,
                       mode=0700,
                       cd_access='a',
@@ -45,12 +45,15 @@ class DremioCordinator(Script):
                       create_parents=True
                       )
 
-        Execute('hdfs dfs -mkdir -p /user/'+params.dremio_user, user='hdfs', ignore_failures=True)
-        Execute('hdfs dfs -chown ' + params.dremio_user + ' /user/'+params.dremio_user, user='hdfs')
-        Execute('hdfs dfs -chgrp ' + params.dremio_group + ' /user/'+params.dremio_user, user='hdfs')
+        params.HdfsResource('/user/' + params.dremio_user,
+                        type="directory",
+                        action="create_on_execute",
+                        owner=params.dremio_user,
+                        mode=0755)
+
 
         # create the pid and log dir
-        Directory([params.dremio_log_dir, params.dremio_pid_dir],
+        Directory([params.dremio_log_dir, params.dremio_pid_dir, params.dremio_install_dir, params.dremio_bin_dir],
                   mode=0755,
                   cd_access='a',
                   owner=params.dremio_user,
@@ -58,21 +61,20 @@ class DremioCordinator(Script):
                   create_parents=True
                   )
 
+
         File('/tmp/dremio.tar.gz',
              content=DownloadSource(params.download_url),
              mode=0644
              )
 
         Execute(
-            ('tar', 'zxvf', '/tmp/dremio.tar.gz', '-C', params.dremio_bin_dir),
+            ('tar', 'zxvf', '/tmp/dremio.tar.gz', '-C', params.dremio_install_dir, '--strip-components', '1'),
             sudo=True
         )
 
-        Link(
-            path=params.dremio_install_dir,
+        Link(params.dremio_install_dir,
             to=params.dremio_bin_dir,
             hard=True,
-            sudo=True,
             ignore_failures=True
         )
 
@@ -87,7 +89,7 @@ class DremioCordinator(Script):
         )
 
         Execute(
-            ('systemctl', 'enable ', 'dremio'),
+            ('systemctl', 'enable', 'dremio'),
             sudo=True
         )
 
@@ -109,16 +111,16 @@ class DremioCordinator(Script):
         import params
         env.set_params(params)
         self.configure(env)
-        Execute("service dremio start")
+        Execute('systemctl', 'start', 'dremio')
 
     def stop(self, env):
-        Execute("service dremio stop")
+        Execute('systemctl', 'stop', 'dremio')
 
     def restart(self, env):
         import params
         env.set_params(params)
         self.configure(env)
-        Execute("service dremio restart")
+        Execute('systemctl', 'restart', 'dremio')
         
     def status(self, env):
         import status_params

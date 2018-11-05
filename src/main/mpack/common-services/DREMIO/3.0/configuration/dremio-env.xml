@@ -145,39 +145,30 @@
 
             services: {
 
-            coordinator: {
-            enabled: true,
+                coordinator: {
+                    enabled: true,
 
-            # Auto-upgrade Dremio at startup if needed
-            auto-upgrade: false,
+                    # Auto-upgrade Dremio at startup if needed
+                    auto-upgrade: false,
 
-            master: {
-            enabled: true,
-            },
+                    master: {
+                        enabled: true,
+                    },
 
-            <!--web: {-->
-            <!--auth: {-->
-            <!--type: "internal", # Possible values are "internal", "ldap" (includes Active directory)-->
-            <!--# LDAP config file for configuration when auth type is "ldap"-->
-            <!--ldap_config: "ldap.json" # file name provided should be in the classpath.-->
-            <!--}-->
-            <!--}-->
-            <!--},-->
-
-            executor: {
-            enabled: false
-            },
+                },
+                executor: {
+                    enabled: false
+                },
 
             # Set up kerberos credentials in server (applicable for both coordinator and executor)
-            kerberos: {
-            principal: "",
-            keytab.file.path: ""
-            }
+            #    kerberos: {
+            #        principal: "",
+            #        keytab.file.path: ""
+            #    }
             }
 
             # the zookeeper quorum for the cluster
-            zookeeper: "localhost:"${services.coordinator.master.embedded-zookeeper.port}
-            ost: ""
+            zookeeper: "{{zookeeper_host_port}}"
 
         </value>
         <value-attributes>

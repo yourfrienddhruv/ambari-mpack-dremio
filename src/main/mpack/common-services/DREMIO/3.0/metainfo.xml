@@ -35,7 +35,8 @@
             </osSpecifics>
 
             <configuration-dependencies>
-                <config-type>dremio-ambari-config</config-type>
+                <config-type>dremio-site</config-type>
+                <config-type>dremio-kerberos-site</config-type>
             </configuration-dependencies>
             <restartRequiredAfterChange>true</restartRequiredAfterChange>
 
