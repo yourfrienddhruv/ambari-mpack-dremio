@@ -8,7 +8,9 @@ from resource_management.libraries.functions.check_process_status import check_p
 from resource_management.libraries.functions.format import format
 from resource_management.libraries.script.script import Script
 from resource_management.core.resources.system import Directory, File, Execute, Link
-from resource_management.core.source import DownloadSource, InlineTemplate
+from resource_management.core.source import DownloadSource, Template
+
+
 
 class DremioCordinator(Script):
 
@@ -22,28 +24,27 @@ class DremioCordinator(Script):
         except KeyError:
             Logger.info(format("Creating group '{params.dremio_group}' for dremio Service"))
             Group(
-                group_name = params.dremio_group,
-                ignore_failures = True
+                group_name=params.dremio_group,
+                ignore_failures=True
             )
         try:
             pwd.getpwnam(params.dremio_user)
         except KeyError:
             Logger.info(format("Creating user '{params.dremio_user}' for dremio Service"))
             User(
-                username = params.dremio_user,
-                groups = [params.dremio_group],
-                ignore_failures = True
+                username=params.dremio_user,
+                groups=[params.dremio_group],
+                ignore_failures=True
             )
 
         if not os.path.exists("/home/{0}".format(params.dremio_user)):
-            Directory(params.dremio_local_home_dir,
+            Directory(params.dremio_home_dir,
                       mode=0700,
                       cd_access='a',
                       owner=params.dremio_user,
                       group=params.dremio_group,
                       create_parents=True
                       )
-
 
         # create the pid and log dir
         Directory([params.dremio_log_dir, params.dremio_pid_dir],
@@ -55,7 +56,7 @@ class DremioCordinator(Script):
                   )
 
         File('/tmp/dremio.tar.gz',
-             content = DownloadSource(params.download_url),
+             content=DownloadSource(params.download_url),
              mode=0644
              )
 
@@ -68,7 +69,8 @@ class DremioCordinator(Script):
             path=params.dremio_install_dir,
             to=params.dremio_bin_dir,
             hard=True,
-            sudo=True
+            sudo=True,
+            ignore_failures=True
         )
 
         Execute(
@@ -89,40 +91,44 @@ class DremioCordinator(Script):
     def configure(self, env):
         import params
         env.set_params(params)
-        File(format("{dremio_home_dir}/dremio.conf"),
-             content=InlineTemplate(params.dremio_conf_content),
-             owner=params.dremio_user
+
+        File("{0}/dremio.conf".format(params.dremio_home_dir),
+             content=Template(
+                 "dremio.conf.j2",
+                 configurations=params.configurations),
+             owner=params.dremio_user,
+             group=params.dremio_group
              )
 
-        File(format("{dremio_home_dir}/dremio-env"),
-             content=InlineTemplate(params.dremio_env_content),
-             owner=params.dremio_user
+        File("{0}/dremio-env".format(params.dremio_home_dir),
+             content=Template(
+                 "dremio-env.j2",
+                 configurations=params.configurations),
+             owner=params.dremio_user,
+             group=params.dremio_group
              )
 
     def start(self, env):
         import params
         self.configure(env)
         Execute("service dremio start")
-        Execute('ps -ef | grep "dremio" | grep -v grep | awk \'{print $2}\' | tail -n 1 > ' + params.dremio_pid_file,
-                user=params.dremio_user
-                )
-
 
     def stop(self, env):
         import params
         env.set_params(params)
-        # Kill the process of Airflow
+        # Kill the process of Dremio
         Execute("service dremio stop")
-        File(params.dremio_pid_file,
-             action = "delete",
-             owner = params.dremio_user
-             )
 
-
+    def restart(self, env):
+        import params
+        env.set_params(params)
+        # Kill the process of Dremio
+        Execute("service dremio restart")
+        
     def status(self, env):
         import params
         env.set_params(params)
-        #use built-in method to check status using pidfile
+        # use built-in method to check status using pidfile
         check_process_status(params.dremio_pid_file)
 
 

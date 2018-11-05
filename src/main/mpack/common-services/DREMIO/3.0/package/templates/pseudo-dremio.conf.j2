@@ -1,0 +1,65 @@
+paths: {
+
+  # the local path for dremio to store data.
+  local: "/var/lib/dremio"
+
+  # the distributed path Dremio data including job results, downloads, uploads, etc
+  dist: "hdfs://<NAMENODE_HOST>:8020/path"
+
+  # location for catalog database (if master node)
+  db: ${paths.local}/db,
+
+  spilling: [${paths.local}/spill]
+
+  # storage area for the accelerator cache.
+  accelerator: ${paths.dist}/accelerator
+
+  # staging area for json and csv ui downloads
+  downloads: ${paths.dist}/downloads
+
+  # stores uploaded data associated with user home directories
+  uploads: ${paths.dist}/uploads
+
+  # stores data associated with the job results cache.
+  results: ${paths.dist}/results
+
+  # shared scratch space for creation of tables.
+  scratch: ${paths.dist}/scratch
+
+}
+
+services: {
+
+  coordinator: {
+    enabled: true,
+
+    # Auto-upgrade Dremio at startup if needed
+    auto-upgrade: false,
+
+    master: {
+      enabled: true,
+    },
+
+    web: {
+      auth: {
+        type: "internal", # Possible values are "internal", "ldap" (includes Active directory)
+        # LDAP config file for configuration when auth type is "ldap"
+        ldap_config: "ldap.json" # file name provided should be in the classpath.
+      }
+    }
+  },
+
+  executor: {
+    enabled: false
+  },
+
+  # Set up kerberos credentials in server (applicable for both coordinator and executor)
+  kerberos: {
+    principal: "",
+    keytab.file.path: ""
+  }
+}
+
+# the zookeeper quorum for the cluster
+zookeeper: "localhost:"${services.coordinator.master.embedded-zookeeper.port}
+ost: ""
