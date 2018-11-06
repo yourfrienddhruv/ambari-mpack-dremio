@@ -53,7 +53,7 @@ class DremioCordinator(Script):
 
 
         # create the pid and log dir
-        Directory([params.dremio_log_dir, params.dremio_pid_dir, params.dremio_install_dir, params.dremio_bin_dir],
+        Directory([params.dremio_log_dir, params.dremio_pid_dir, params.dremio_install_dir],
                   mode=0755,
                   cd_access='a',
                   owner=params.dremio_user,
@@ -78,10 +78,9 @@ class DremioCordinator(Script):
             ignore_failures=True
         )
 
-        Execute(
-            ('cp', params.dremio_install_dir + '/share/dremio.service', '/etc/systemd/system/dremio.service'),
-            sudo=True
-        )
+        properties_content = InlineTemplate(params.dremio_service_content)
+        File(format("/etc/systemd/system/dremio.service"),
+             content=properties_content)
 
         Execute(
             ('systemctl', 'daemon-reload'),
@@ -106,6 +105,8 @@ class DremioCordinator(Script):
         File(format("{dremio_home_dir}/dremio-env"),
              content=properties_content,
              owner=params.dremio_user)
+
+
 
     def start(self, env):
         import params

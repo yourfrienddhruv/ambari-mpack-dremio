@@ -29,6 +29,7 @@ ambari_server_hostname = config['clusterHostInfo']['ambari_server_host'][0]
 
 dremio_conf_content = config['configurations']['dremio-env']['dremio_conf']
 dremio_env_content = config['configurations']['dremio-env']['dremio_env']
+dremio_service_content = config['configurations']['dremio-env']['dremio_service']
 dremio_user = config['configurations']['dremio-env']['dremio_user']
 dremio_group = config['configurations']['dremio-env']['dremio_group']
 dremio_home_dir = config['configurations']['dremio-env']['dremio_home_dir']
@@ -78,7 +79,7 @@ zookeeper_rest_url = ''
 if len(zookeeper_hosts) > 0:
     if zookeeper_client_port is not None:
         for i in range(len(zookeeper_hosts)):
-            zookeeper_host_ports.append(format(zookeeper_hosts[i] + ":{{zookeeper_client_port}}"))
+            zookeeper_host_ports.append(format(zookeeper_hosts[i] + ":" + zookeeper_client_port))
     else:
         for i in range(len(zookeeper_hosts)):
             zookeeper_host_ports.append(format(zookeeper_hosts[i] + ":2181"))
