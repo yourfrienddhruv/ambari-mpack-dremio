@@ -5,7 +5,8 @@
         <service>
             <name>DREMIO</name>
             <displayName>Dremio</displayName>
-            <comment>Dremio
+            <comment>
+                Dremio brings self-service to data analysts and SQL queries to NoSQL data sources
             </comment>
             <version>3.0</version>
 
@@ -36,6 +37,7 @@
 
             <configuration-dependencies>
                 <config-type>dremio-site</config-type>
+                <config-type>core-site</config-type>
                 <config-type>dremio-kerberos-site</config-type>
             </configuration-dependencies>
             <restartRequiredAfterChange>true</restartRequiredAfterChange>

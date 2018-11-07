@@ -1,17 +1,37 @@
 {
-  "services": [
-    {
-      "name": "DREMIO",
-      "identities": [
-        {
-          "name": "/smokeuser"
+  "services": [{
+    "name": "DREMIO",
+    "identities": [{
+      "name": "dremio",
+      "principal": {
+        "value": "${dremio-env/dremio}${principal_suffix}@${realm}",
+        "type": "user",
+        "configuration": "dremio-env/dremio_principal_name",
+        "local_username": "${accumulo-env/dremio_user}"
+      },
+      "keytab": {
+        "file": "${keytab_dir}/dremio.headless.keytab",
+        "owner": {
+          "name": "${dremio-env/dremio_user}",
+          "access": "r"
+        },
+        "group": {
+          "name": "${cluster-env/user_group}",
+          "access": "r"
+        },
+        "configuration": "dremio-env/dremio_user_keytab"
+      }
+    }],
+    "configurations": [
+      {
+        "core-site": {
+          "hadoop.proxyuser.${dremio-env/dremio_user}.groups": "*",
+          "hadoop.proxyuser.${dremio-env/dremio_user}.hosts": "*"
         }
-      ],
-      "components": [
-        {
-          "name": "DREMIO_COORDINATOR"
-        }
-      ]
-    }
-  ]
+      }
+    ],
+    "components": [{
+      "name": "DREMIO_COORDINATOR"
+    }]
+  }]
 }

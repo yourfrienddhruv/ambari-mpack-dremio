@@ -109,6 +109,19 @@
     </property>
 
     <property>
+        <name>dremio_user_keytab</name>
+        <description>Dremio keytab path</description>
+        <on-ambari-upgrade add="true"/>
+    </property>
+
+    <property>
+        <name>dremio_principal_name</name>
+        <description>Dremio principal name</description>
+        <property-type>KERBEROS_PRINCIPAL</property-type>
+        <on-ambari-upgrade add="true"/>
+    </property>
+
+    <property>
         <name>dremio_conf</name>
         <description>Dremio conf File</description>
         <value>
